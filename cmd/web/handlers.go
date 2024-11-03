@@ -12,7 +12,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("server", "go")
 	// w.Write([]byte("Hello from snippetbox"))
 
-	templ, err := template.ParseFiles("./ui/html/base.tmpl.html", "./ui/html/pages/home.tmpl.html")
+	templ, err := template.ParseFiles("./ui/html/base.tmpl.html", "./ui/html/partials/nav.tmpl.html", "./ui/html/pages/home.tmpl.html")
 
 	if err != nil {
 		log.Print(err.Error())
