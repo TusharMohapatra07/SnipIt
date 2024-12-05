@@ -9,7 +9,6 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("server", "go")
-	// w.Write([]byte("Hello from snippetbox"))
 	files := []string{"./ui/html/base.tmpl.html", "./ui/html/partials/nav.tmpl.html", "./ui/html/pages/home.tmpl.html"}
 	ts, err := template.ParseFiles(files...)
 
