@@ -65,3 +65,6 @@ The project follows a clean architecture with separate packages for handlers, mo
 ```
   Open your browser and go to `http://localhost:<PORT>` (PORT IS 4040 BY DEFAULT).
 
+## License  
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.  
