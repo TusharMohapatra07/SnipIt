@@ -14,7 +14,7 @@ type Snippet struct {
 }
 
 type SnippetModel struct {
-	DB sql.DB
+	DB *sql.DB
 }
 
 // Insert a new snippet into database
