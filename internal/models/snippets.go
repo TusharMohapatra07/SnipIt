@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -17,10 +18,17 @@ type SnippetModel struct {
 	DB *sql.DB
 }
 
+var (
+	ErrNoRecord = errors.New("models: no matching record found")
+)
+
 // Insert a new snippet into database and returns the id
 func (sm *SnippetModel) Insert(title string, content string, expires int) (int, error) {
-	stmt := `INSERT INTO snippets (title, content, created, expires) 
-    VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + $3 * INTERVAL '1 DAY') RETURNING id`
+	stmt := `INSERT INTO snippets 
+    (title, content, created, expires) 
+    VALUES 
+    ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + $3 * INTERVAL '1 DAY') 
+    RETURNING id`
 
 	var id int
 
@@ -33,8 +41,27 @@ func (sm *SnippetModel) Insert(title string, content string, expires int) (int, 
 }
 
 // Get a snippet corresponding to an id
-func (sm *SnippetModel) Get(id int) (*Snippet, error) {
-	return nil, nil
+func (sm *SnippetModel) Get(id int) (Snippet, error) {
+	stmt := `SELECT id, title, content, created, expires 
+    FROM snippets 
+    WHERE expires > CURRENT_TIMESTAMP 
+    AND 
+    id = $1`
+
+	row := sm.DB.QueryRow(stmt, id)
+
+	var s Snippet
+
+	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Snippet{}, ErrNoRecord
+		} else {
+			return Snippet{}, err
+		}
+	}
+
+	return s, nil
 }
 
 // Returns 10 most recent created snippets
