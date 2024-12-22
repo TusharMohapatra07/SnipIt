@@ -20,13 +20,13 @@ type SnippetModel struct {
 // Insert a new snippet into database and returns the id
 func (sm *SnippetModel) Insert(title string, content string, expires int) (int, error) {
 	stmt := `INSERT INTO snippets (title, content, created, expires) 
-    VALUES ($1, $2, CURRENT_TIMESTAMP, DATE_ADD(CURRENT_TIMESTAMP, '$3 DAYS'::INTERVAL)) RETURNING id`
+    VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + $3 * INTERVAL '1 DAY') RETURNING id`
 
 	var id int
 
 	err := sm.DB.QueryRow(stmt, title, content, expires).Scan(&id)
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return int(id), nil
