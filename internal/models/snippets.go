@@ -69,7 +69,7 @@ func (sm *SnippetModel) Latest() ([]Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires 
     FROM snippets
     WHERE expires > CURRENT_TIMESTAMP
-    ORDER BY DESC
+    ORDER BY id DESC
     LIMIT 10`
 
 	rows, err := sm.DB.Query(stmt)
