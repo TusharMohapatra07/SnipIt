@@ -38,10 +38,10 @@ The project follows a clean architecture with separate packages for handlers, mo
   go mod tidy
 ```
 
-3. **Copy the `Makefile-example` to a new file named `Makefile` in the same directory**
+3. **Copy `.env.example` to a new file named `.env` in the same directory**
   You can use the following command:
 ```bash
-  cp Makefile-example Makefile
+  cp .env.example .env
 ```
 
 4. **Setup the database**
@@ -60,10 +60,11 @@ The project follows a clean architecture with separate packages for handlers, mo
 ```
 
 6. **Run the application**
+    *Optional: Change the port by modifying the `ADDRESS` variable in `.env` file (default is :4040)*
 ```bash
   make 
 ```
-  Open your browser and go to `http://localhost:<PORT>` (PORT IS 4040 BY DEFAULT).
+  Open your browser and go to `http://localhost:<PORT>`.
 
 ## License  
 

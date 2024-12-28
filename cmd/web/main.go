@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"snippetbox/internal/models"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -18,16 +18,19 @@ type application struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP Network Address")
-	dsn := flag.String("dsn", `postgresql://<username>:<password>@<host>:<port>/<database>?<parameters>`, "PostgreSQL data source name")
-	flag.Parse()
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:     slog.LevelDebug,
 		AddSource: true,
 	}))
 
-	db, err := openDB(*dsn)
+	err := godotenv.Load(".env")
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	connStr := os.Getenv("CONNSTR")
+	addr := os.Getenv("ADDRESS")
+
+	db, err := openDB(connStr)
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -40,8 +43,8 @@ func main() {
 
 	mux := app.routes()
 
-	logger.Info("Starting server", "addr", *addr)
-	err = http.ListenAndServe(*addr, mux)
+	logger.Info("Starting server", "addr", addr)
+	err = http.ListenAndServe(addr, mux)
 
 	logger.Error(err.Error())
 }
