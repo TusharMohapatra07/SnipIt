@@ -6,3 +6,11 @@ for (var i = 0; i < navLinks.length; i++) {
 		break;
 	}
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const snippetContent = document.querySelector('.snippet pre code');
+    if (snippetContent) {
+        const content = snippetContent.innerHTML;
+        snippetContent.innerHTML = content.replace(/\\n/g, '<br>');
+    }
+});
