@@ -3,15 +3,15 @@ package main
 import (
 	"html/template"
 	"path/filepath"
-	"time"
-
 	"snippetbox/internal/models"
+	"time"
 )
 
 type templateData struct {
 	Snippet  models.Snippet
 	Snippets []models.Snippet
 	Form     any
+	Flash    string
 }
 
 func humanDate(t time.Time) string {
