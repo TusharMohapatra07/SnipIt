@@ -1,4 +1,6 @@
 bin/
+*/key.pem
+*/cert.pem
 
 
 /vendor/
