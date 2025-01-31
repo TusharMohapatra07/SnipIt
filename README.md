@@ -7,17 +7,9 @@ Snippetbox is a lightweight web application for managing code snippets, built in
 - Create, view, and manage code snippets.
 - HTML templating for dynamic web pages.
 - PostgreSQL database integration for persistent storage.
-<!---
+- Modular code structure for scalability and maintainability.
+- Secure web development practices, including CSRF protection and input validation.
 - User authentication with session-based login.  
-- Secure web development practices, including CSRF protection and input validation.  
-- Modular code structure for scalability and maintainability.  
---->
-
-<!--
-## Project Structure  
-
-The project follows a clean architecture with separate packages for handlers, models, and utilities.  
--->
 
 ## Requirements
 
@@ -59,7 +51,25 @@ The project follows a clean architecture with separate packages for handlers, mo
   CONNSTR=postgres://username:password@localhost:5432/snippetbox?sslmode=disable
 ```
 
-6. **Run the application**
+6. **Generate TLS certificates**  
+The application requires TLS certificates for secure connections.  
+
+- First, create a `tls` directory in the project root:  
+  ```bash
+  mkdir tls
+  ```
+- Change into the `tls` directory:  
+  ```bash
+  cd tls
+  ```
+- Run Go’s built-in certificate generator:  
+  ```bash
+  go run $(go env GOROOT)/src/crypto/tls/generate_cert.go -rsa-bits 2048 -host localhost
+  ```
+  This will generate `cert.pem` and `key.pem` inside the `tls` directory.
+
+
+7. **Run the application**
     *Optional: Change the port by modifying the `ADDRESS` variable in `.env` file (default is :4040)*
 ```bash
   make 
