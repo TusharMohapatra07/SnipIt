@@ -45,5 +45,3 @@ CREATE TABLE users (
     created TIMESTAMP WITH TIME ZONE NOT NULL,
     UNIQUE(email)
 );
-
-
