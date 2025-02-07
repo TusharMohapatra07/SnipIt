@@ -1,6 +1,6 @@
-# Snippetbox  
+# SnipIt  
 
-Snippetbox is a lightweight web application for managing code snippets, built in Go. <!-- It features user authentication, database integration, secure web practices, and demonstrates best practices for building modern web applications. -->
+SnipIt is a lightweight web application for managing code snippets, built in Go. <!-- It features user authentication, database integration, secure web practices, and demonstrates best practices for building modern web applications. -->
 
 ## Features  
 
@@ -20,8 +20,8 @@ Snippetbox is a lightweight web application for managing code snippets, built in
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/TusharMohapatra07/snippetbox.git
-   cd snippetbox
+   git clone https://github.com/TusharMohapatra07/SnipIt.git
+   cd SnipIt
 ```
 
 2. **Install Dependencies**
@@ -40,15 +40,15 @@ Snippetbox is a lightweight web application for managing code snippets, built in
   Make sure PostgreSQL is installed and running. Create the database and schema:
 ```bash
   psql -U postgres
-  CREATE DATABASE snippetbox;
-  \c snippetbox
+  CREATE DATABASE snipit;
+  \c sniptit
   \i ./db-table-create.sql
 ```
 
 5. **Set connection string**
      Replace the `CONNSTR` placeholder with an actual `PostgreSQL` connection string. For Example:
 ```make
-  CONNSTR=postgres://username:password@localhost:5432/snippetbox?sslmode=disable
+  CONNSTR=postgres://username:password@localhost:5432/snipit?sslmode=disable
 ```
 
 6. **Generate TLS certificates**  
