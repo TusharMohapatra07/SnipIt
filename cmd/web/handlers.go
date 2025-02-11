@@ -7,6 +7,8 @@ import (
 	"snippetbox/internal/models"
 	"snippetbox/internal/validator"
 	"strconv"
+
+	"github.com/justinas/nosurf"
 )
 
 type snippetCreateForm struct {
@@ -40,6 +42,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		Snippets:        snippets,
 		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	})
 }
 
@@ -64,6 +67,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		Snippet:         snippet,
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 
 	data.Flash = flash
@@ -74,6 +78,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 	data.Form = snippetCreateForm{
 		Expires: 365,
@@ -108,6 +113,7 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 	if !form.Valid() {
 		data := templateData{
+			CSRFToken:       nosurf.Token(r),
 			IsAuthenticated: app.isAuthenticated(r),
 		}
 		data.Form = form
@@ -128,6 +134,7 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
+		CSRFToken:       nosurf.Token(r),
 		IsAuthenticated: app.isAuthenticated(r),
 	}
 	data.Form = userSignupForm{}
@@ -155,6 +162,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 		data := templateData{
+			CSRFToken:       nosurf.Token(r),
 			IsAuthenticated: app.isAuthenticated(r),
 		}
 		data.Form = form
@@ -167,6 +175,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
 			data := templateData{
+				CSRFToken:       nosurf.Token(r),
 				IsAuthenticated: app.isAuthenticated(r),
 			}
 			data.Form = form
@@ -184,6 +193,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
+		CSRFToken:       nosurf.Token(r),
 		IsAuthenticated: app.isAuthenticated(r),
 	}
 	data.Form = userLoginForm{}
@@ -207,6 +217,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 		data := templateData{
+			CSRFToken:       nosurf.Token(r),
 			Form:            form,
 			IsAuthenticated: app.isAuthenticated(r),
 		}
@@ -220,6 +231,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 			form.AddNonFieldError("Email or password is incorrect")
 
 			data := templateData{
+				CSRFToken:       nosurf.Token(r),
 				Form:            form,
 				IsAuthenticated: app.isAuthenticated(r),
 			}
