@@ -11,3 +11,5 @@ require (
 )
 
 require golang.org/x/crypto v0.32.0
+
+require github.com/justinas/alice v1.2.0 // indirect

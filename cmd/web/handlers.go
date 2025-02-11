@@ -37,7 +37,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.render(w, r, http.StatusOK, "home.tmpl.html", templateData{
-		Snippets: snippets,
+		Snippets:        snippets,
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+		IsAuthenticated: app.isAuthenticated(r),
 	})
 }
 
@@ -60,7 +62,8 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	data := templateData{
-		Snippet: snippet,
+		Snippet:         snippet,
+		IsAuthenticated: app.isAuthenticated(r),
 	}
 
 	data.Flash = flash
@@ -69,7 +72,9 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	data := templateData{}
+	data := templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	}
 	data.Form = snippetCreateForm{
 		Expires: 365,
 	}
@@ -102,7 +107,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	form.CheckField(validator.PermittedValue(form.Expires, 1, 7, 365), "expires", "This field must equal 1, 7 or 365")
 
 	if !form.Valid() {
-		data := templateData{}
+		data := templateData{
+			IsAuthenticated: app.isAuthenticated(r),
+		}
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "create.tmpl.html", data)
 		return
@@ -120,7 +127,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
-	data := templateData{}
+	data := templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	}
 	data.Form = userSignupForm{}
 	app.render(w, r, http.StatusOK, "signup.tmpl.html", data)
 }
@@ -145,7 +154,9 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at least 8 characters long")
 
 	if !form.Valid() {
-		data := templateData{}
+		data := templateData{
+			IsAuthenticated: app.isAuthenticated(r),
+		}
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
 		return
@@ -155,7 +166,9 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
-			data := templateData{}
+			data := templateData{
+				IsAuthenticated: app.isAuthenticated(r),
+			}
 			data.Form = form
 			app.render(w, r, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
 		} else {
@@ -170,7 +183,9 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
-	data := templateData{}
+	data := templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	}
 	data.Form = userLoginForm{}
 	app.render(w, r, http.StatusOK, "login.tmpl.html", data)
 }
@@ -192,7 +207,8 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 		data := templateData{
-			Form: form,
+			Form:            form,
+			IsAuthenticated: app.isAuthenticated(r),
 		}
 		app.render(w, r, http.StatusUnprocessableEntity, "login.tmpl.html", data)
 		return
@@ -204,7 +220,8 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 			form.AddNonFieldError("Email or password is incorrect")
 
 			data := templateData{
-				Form: form,
+				Form:            form,
+				IsAuthenticated: app.isAuthenticated(r),
 			}
 			app.render(w, r, http.StatusUnprocessableEntity, "login.tmpl.html", data)
 		} else {
@@ -219,10 +236,17 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedID", id)
+	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Logout the user...")
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

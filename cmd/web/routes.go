@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/justinas/alice"
+)
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
@@ -8,18 +12,20 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	dynamicMux := http.NewServeMux()
-	dynamicMux.HandleFunc("GET /{$}", app.home)
-	dynamicMux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
-	dynamicMux.HandleFunc("GET /snippet/create", app.snippetCreate)
-	dynamicMux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
-	dynamicMux.HandleFunc("GET /user/signup", app.userSignup)
-	dynamicMux.HandleFunc("POST /user/signup", app.userSignupPost)
-	dynamicMux.HandleFunc("GET /user/login", app.userLogin)
-	dynamicMux.HandleFunc("POST /user/login", app.userLoginPost)
-	dynamicMux.HandleFunc("GET /user/logout", app.userLogoutPost)
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
-	mux.Handle("/", app.sessionManager.LoadAndSave(dynamicMux))
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /snippet/view/{id}", dynamic.ThenFunc(app.snippetView))
+	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignup))
+	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.userSignupPost))
+	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
+	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLoginPost))
 
-	return app.panicRecovery(app.logRequest(commonHeaders(mux)))
+	protected := dynamic.Append(app.requireAuthentication)
+	mux.Handle("GET /snippet/create", protected.ThenFunc(app.snippetCreate))
+	mux.Handle("POST /snippet/create", protected.ThenFunc(app.snippetCreatePost))
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
+
+	standard := alice.New(app.panicRecovery, app.logRequest, commonHeaders)
+	return standard.Then(mux)
 }
